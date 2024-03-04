@@ -69,15 +69,15 @@ def download_poster(poster_path, movie_id):
     else:
         print(f"Failed to download poster for movie {movie_id}")
         print(response.json().get("status_message"))
-        
+
 
 def main():
     authenticate()
     token = create_session()
     movielist = get_movielist()
     
-    # create a file to store the movie list cleanly by writing to a json file
-    with open("movielist.json", "w") as file:
+    # create a file to store the movie list cleanly by writing to a file
+    with open("movielist.out", "w") as file:
         for movie in movielist.get("results"):
             # get title and link to poster
             title = movie.get("title")
