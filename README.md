@@ -12,7 +12,7 @@ This script is used to create a dataset from TMDB. It uses the TMDB API to get t
 ## Usage
 
 ```bash
-python -m pip install requests
+python -m pip install requests load_dotenv
 python3 tmdb.py
 ```
 
@@ -21,6 +21,7 @@ python3 tmdb.py
 * python3
 * python3-pip
 * python3-requests
+* load_dotenv
 
 ## Notes
 
