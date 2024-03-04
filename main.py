@@ -53,7 +53,7 @@ def get_movielist():
         print("Movie list retrieval failed")
         print(response.json().get("status_message"))
 
-def download_poster(poster_path, movie_id):
+def download_poster(poster_path, movie_id, movie_title):
     # download the poster to the movie id for easy reference
     # create a folder to store the posters
     if not os.path.exists("posters"):
@@ -63,8 +63,8 @@ def download_poster(poster_path, movie_id):
     response = requests.get(url)
 
     if response.status_code == 200:
-        print(f"Downloading poster for movie {movie_id}")
-        with open(f"posters/{movie_id}.jpg", "wb") as file:
+        print(f"Downloading poster for movie {movie_title}")
+        with open(f"posters/{movie_id}-{movie_title}.jpg", "wb") as file:
             file.write(response.content)
     else:
         print(f"Failed to download poster for movie {movie_id}")
@@ -90,9 +90,9 @@ def main():
     # download the posters of the movies in the list
 
     for movie in movielist.get("results"):
-        download_poster(movie.get("poster_path"), movie.get("id"))
+        download_poster(movie.get("poster_path"), movie.get("id"), movie.get("title"))
 
-    print("Done downloading posters!")
+    print("Done downloading posters")
 
 
 if __name__ == "__main__":
