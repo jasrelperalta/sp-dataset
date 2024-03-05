@@ -1,4 +1,4 @@
-import requests, os
+import requests, os, random
 from dotenv import load_dotenv
 
 load_dotenv("secret.env")
@@ -36,12 +36,19 @@ def create_session():
         print("Session creation failed")
         print(response.json().get("status_message"))
 
+def get_random_page_number(page_list):
+    while True:
+        page_number = random.randint(1, 500)
+        if page_number not in page_list:
+            return page_number 
+
 def get_movielist(genre_id):
     counter = 0
-    page_counter = 1
+    page_list = []
     movie_list = []
-    while counter < 2001:
-        url = f"https://api.themoviedb.org/3/discover/movie?include_adult=true&include_video=false&page={str(page_counter)}&sort_by=popularity.desc&with_genres={genre_id}"
+    page_number = 1
+    while counter < 2021:
+        url = f"https://api.themoviedb.org/3/discover/movie?include_adult=true&include_video=false&page={str(page_number)}&sort_by=popularity.desc&with_genres={genre_id}"
 
         headers = {
             "accept": "application/json",
@@ -51,9 +58,10 @@ def get_movielist(genre_id):
         response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
-            print(f"Movie list retrieved for genre {genre_id} page {page_counter} counter {counter}")
+            print(f"Movie list retrieved for genre {genre_id} page {page_number} counter {counter}")
             counter += count_movies_in_list_response(response.json())
-            page_counter += 1
+            page_list.append(page_number)
+            page_number = get_random_page_number(page_list)
             movie_list.append(response.json().get("results"))
 
         else:
@@ -63,7 +71,11 @@ def get_movielist(genre_id):
     return movie_list
 
 def count_movies_in_list_response(response):
-    return len(response.get("results"))
+    counter = 0
+    for movie in response.get("results"):
+        if movie.get("poster_path") is not None:
+            counter += 1
+    return counter
 
 def download_poster(poster_path, movie_id, movie_title, genre_name):
     # download the poster to the movie id for easy reference
@@ -90,6 +102,30 @@ def download_poster(poster_path, movie_id, movie_title, genre_name):
             file.write(response.content)
     else:
         print(f"Failed to download poster for movie {movie_id}")
+
+def get_movie_details(genre_ids, genre_names):
+    for i in range(len(genre_ids)):
+        movielist = get_movielist(genre_ids[i])
+
+        # create a folder to store the movie list
+        if not os.path.exists("movielists"):
+            os.makedirs("movielists")
+
+        with open(f"movielists/{genre_names[i]}.out", "w") as file:
+            print(f"Writing movie list for {genre_names[i]}")
+            for page in movielist:
+                for movie in page:
+                    # store the movie id, title, poster path, release date in a file
+                    file.write(f"{movie.get('id')} - {movie.get('title')} - {movie.get('poster_path')} - {movie.get('release_date')}\n")
+            print(f"Done writing movie list for {genre_names[i]}")
+
+        # download the posters of the movies in the list
+        # create a separate folder to store the posters per genre
+        for page in movielist:
+            for movie in page:
+                download_poster(movie.get("poster_path"), movie.get("id"), movie.get("title"), genre_names[i])
+
+        print(f"Done downloading posters for {genre_names[i]}")
 
 
 def main():
@@ -120,28 +156,9 @@ def main():
         "Thriller"
     ]
 
-    for i in range(len(genre_ids)):
-        movielist = get_movielist(genre_ids[i])
+    get_movie_details(genre_ids, genre_names)
 
-        # create a folder to store the movie list
-        if not os.path.exists("movielists"):
-            os.makedirs("movielists")
-
-        with open(f"movielists/{genre_names[i]}.out", "w") as file:
-            print(f"Writing movie list for {genre_names[i]}")
-            for page in movielist:
-                for movie in page:
-                    # store the movie id, title, poster path, release date in a file
-                    file.write(f"{movie.get('id')} - {movie.get('title')} - {movie.get('poster_path')} - {movie.get('release_date')}\n")
-            print(f"Done writing movie list for {genre_names[i]}")
-
-        # download the posters of the movies in the list
-        # create a separate folder to store the posters per genre
-        for page in movielist:
-            for movie in page:
-                download_poster(movie.get("poster_path"), movie.get("id"), movie.get("title"), genre_names[i])
-
-        print(f"Done downloading posters for {genre_names[i]}")
+    
 
 if __name__ == "__main__":
     main()
