@@ -62,7 +62,7 @@ def get_movie_details(genre_ids, genre_names):
 
         for movie in movielist:
             # store the movie id, title, poster path, release date in a file")
-            if download_poster(movie['movie_poster'], movie['movie_id'], movie['movie_title'], genre_names[i], counter):
+            if download_poster(movie['movie_poster'], movie['movie_id'], movie['movie_title'], genre_names[i], counter, 0):
                 with open("movielists/master.out", "a") as file:
                     file.write(f"{movie['movie_id']} - {movie['movie_title']} - {movie['movie_poster']} - {genre_names[i]}\n")
                     counter += 1
@@ -122,12 +122,12 @@ def count_movies_in_list_response(response):
         if movie.get("poster_path") is not None:
             counter += 1
         else:
-            print(f"Movie {movie.get('id')} - {movie.get('title')} has no poster")
+            print(f"Movie {movie.get('id')} - {movie.get('title')} has no poster: Not Counted")
     return counter
 
 
 # download the poster of the movie
-def download_poster(poster_path, movie_id, movie_title, genre_name, counter):
+def download_poster(poster_path, movie_id, movie_title, genre_name, counter, retry_count):
     # download the poster to the movie id for easy reference
 
     print(f"{counter}/2000  Downloading poster for movie {movie_id} - {movie_title}")
@@ -147,7 +147,17 @@ def download_poster(poster_path, movie_id, movie_title, genre_name, counter):
     
     else:
         print(f"Failed to download poster for movie {movie_id}")
-        return False
+        download_poster(poster_path, movie_id, movie_title, genre_name, counter, retry_count + 1)
+
+    if retry_count == 5:
+        print(f"Failed to download poster for movie {movie_id} after 5 retries")
+        # ask retry again
+        retry = input("Retry again? (y/n): ")
+        if retry == "y":
+            download_poster(poster_path, movie_id, movie_title, genre_name, counter, 0)
+        else:
+            return False
+    
         
 
 # main function
@@ -185,8 +195,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# TODO:
-# create a master file
-# create a separate file with all the id and genre and title
-# create a file for id and poster
