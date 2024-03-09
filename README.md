@@ -21,7 +21,15 @@ python3 tmdb.py
 * python3
 * python3-pip
 * python3-requests
+* json
+* tensorflow
 * load_dotenv
+* tf-explain
+* numpy
+* pandas
+* matplotlib
+* keras
+* opencv-python
 
 ## Notes
 
