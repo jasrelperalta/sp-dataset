@@ -22,7 +22,7 @@ python3 tmdb.py
 * python3-pip
 * python3-requests
 * json
-* tensorflow
+* tensorflow[with-cuda]
 * load_dotenv
 * tf-explain
 * numpy
