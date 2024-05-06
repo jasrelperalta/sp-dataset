@@ -8,13 +8,14 @@ from tensorflow.keras import layers, models
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 import sys
 
 # Print options
 np.set_printoptions(threshold=sys.maxsize)
 
 # Initialize constants
-EPOCHS = 100
+EPOCHS = 1
 LR = 4e-3
 BS = 64
 DIMS = (299, 299, 3)
@@ -28,16 +29,17 @@ classes = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Drama", "Fant
 print("[INFO] loading images...")
 
 # Load CSV file
-csv_file_path = 'movie_dataset_combined.csv'
-dataframe = pd.read_csv(csv_file_path)
-
+train_csv_file_path = 'movie_dataset_train.csv'
+valid_csv_file_path = 'movie_dataset_val.csv'
+train_df = pd.read_csv(train_csv_file_path)
+valid_df = pd.read_csv(valid_csv_file_path)
 
 # Load the images and labels using image data generator from directory
 datagen=ImageDataGenerator(rescale=1./255.)
 test_datagen=ImageDataGenerator(rescale=1./255.)
 
 train_generator=datagen.flow_from_dataframe(
-dataframe=dataframe[:(len(dataframe) // 5) * 4],
+dataframe=train_df,
 directory="newpo/posters",
 x_col="filename",
 y_col=classes,
@@ -48,7 +50,7 @@ class_mode="raw",
 target_size=(299,299))
 
 valid_generator=test_datagen.flow_from_dataframe(
-dataframe=dataframe[(len(dataframe) // 5) * 4:],
+dataframe=valid_df,
 directory="newpo/posters",
 x_col="filename",
 y_col=classes,
@@ -79,7 +81,7 @@ model = models.Sequential([
 opt = Adam(learning_rate=LR)
 
 # Compile the model
-model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=opt, loss='binary_crossentropy', metrics=[tf.keras.metrics.F1Score(average='macro', name='f1_macro'), tf.keras.metrics.F1Score(average='micro', name='f1_micro'), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
 # train the network
 print("[INFO] training network...")
@@ -90,38 +92,64 @@ H = model.fit(
 
 # save the model to disk
 print("[INFO] serializing network...")
-model.save("test.keras")
+model.save("./models/test.keras")
 
-# plot the training loss and accuracy separately
+# plot the training f1-micro score
+plt.style.use("ggplot")
+plt.figure()
+plt.plot(np.arange(0, EPOCHS), H.history["f1_micro"], label="train_f1_micro")
+plt.plot(np.arange(0, EPOCHS), H.history["val_f1_micro"], label="val_f1_micro")
+plt.title("Training F1-Micro Score")
+plt.xlabel("Epoch #")
+plt.ylabel("F1-Micro Score")
+plt.legend()
+plt.savefig("./plots/plot-f1-micro.png")
+
+# plot the training f1-macro score
+plt.style.use("ggplot")
+plt.figure()
+plt.plot(np.arange(0, EPOCHS), H.history["f1_macro"], label="train_f1_macro")
+plt.plot(np.arange(0, EPOCHS), H.history["val_f1_macro"], label="val_f1_macro")
+plt.title("Training F1-Macro Score")
+plt.xlabel("Epoch #")
+plt.ylabel("F1-Macro Score")
+plt.legend()
+plt.savefig("./plots/plot-f1-macro.png")
+
+
+# plot the training precision
+plt.style.use("ggplot")
+plt.figure()
+plt.plot(np.arange(0, EPOCHS), H.history["precision"], label="train_precision")
+plt.plot(np.arange(0, EPOCHS), H.history["val_precision"], label="val_precision")
+plt.title("Training Precision")
+plt.xlabel("Epoch #")
+plt.ylabel("Precision")
+plt.legend()
+plt.savefig("./plots/plot-precision.png")
+
+# plot the training recall
+plt.style.use("ggplot")
+plt.figure()
+plt.plot(np.arange(0, EPOCHS), H.history["recall"], label="train_recall")
+plt.plot(np.arange(0, EPOCHS), H.history["val_recall"], label="val_recall")
+plt.title("Training Recall")
+plt.xlabel("Epoch #")
+plt.ylabel("Recall")
+plt.legend()
+plt.savefig("./plots/plot-recall.png")
+
+# plot the training loss
 plt.style.use("ggplot")
 plt.figure()
 plt.plot(np.arange(0, EPOCHS), H.history["loss"], label="train_loss")
-plt.title("Loss")
+plt.plot(np.arange(0, EPOCHS), H.history["val_loss"], label="val_loss")
+plt.title("Training Loss")
 plt.xlabel("Epoch #")
 plt.ylabel("Loss")
 plt.legend()
-plt.savefig("plot.png")
+plt.savefig("./plots/plot-loss.png")
 
-# plot the training loss and accuracy separately
-plt.style.use("ggplot")
-plt.figure()
-plt.plot(np.arange(0, EPOCHS), H.history["accuracy"], label="train_loss")
-plt.title("Accuracy")
-plt.xlabel("Epoch #")
-plt.ylabel("Accuracy")
-plt.legend()
-plt.savefig("plot.png")
-
-# plot the training loss and accuracy separately
-plt.style.use("ggplot")
-plt.figure()
-plt.plot(np.arange(0, EPOCHS), H.history["val_loss"], label="val_loss")
-plt.plot(np.arange(0, EPOCHS), H.history["val_accuracy"], label="val_acc")
-plt.title("Validation Loss and Accuracy")
-plt.xlabel("Epoch #")
-plt.ylabel("Loss/Accuracy")
-plt.legend()
-plt.savefig("plot_val.png")
 
 # print the classification report
 print("[INFO] evaluating network...")
