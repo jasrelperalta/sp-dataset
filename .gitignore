@@ -165,7 +165,10 @@ secret.env
 # posters folder
 posters/
 movielists/
+movielists2/
 x/
 newpo/
 ignore/
 posters2/
+backup/
+combined_posters/

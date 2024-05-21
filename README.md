@@ -30,6 +30,8 @@ python3 tmdb.py
 * matplotlib
 * keras
 * opencv-python
+* imutils
+* sklearn
 
 ## Notes
 

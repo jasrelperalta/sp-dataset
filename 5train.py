@@ -1,10 +1,10 @@
 import matplotlib
 matplotlib.use('Agg')
 
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.applications import Xception
-from tensorflow.keras import layers, models
+from tensorflow.keras.preprocessing.image import ImageDataGenerator # type: ignore
+from tensorflow.keras.optimizers import Adam # type: ignore
+from tensorflow.keras.applications import Xception # type: ignore
+from tensorflow.keras import layers, models # type: ignore
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -29,9 +29,9 @@ classes = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Drama", "Fant
 print("[INFO] loading images...")
 
 # Load CSV file
-train_csv_file_path = 'movie_dataset_train.csv'
-valid_csv_file_path = 'movie_dataset_val.csv'
-test_csv_file_path = 'movie_dataset_test.csv'
+train_csv_file_path = 'movie_dataset_train2.csv'
+valid_csv_file_path = 'movie_dataset_val2.csv'
+test_csv_file_path = 'movie_dataset_test2.csv'
 train_df = pd.read_csv(train_csv_file_path)
 valid_df = pd.read_csv(valid_csv_file_path)
 test_df = pd.read_csv(test_csv_file_path)
@@ -44,7 +44,7 @@ test_datagen=ImageDataGenerator(rescale=1./255.)
 # Load the images and labels using image data generator from directory
 train_generator=train_datagen.flow_from_dataframe(
 dataframe=train_df,
-directory="newpo/posters",
+directory="combined_posters",
 x_col="filename",
 y_col=classes,
 batch_size=BS,
@@ -55,7 +55,7 @@ target_size=(299,299))
 
 valid_generator=val_datagen.flow_from_dataframe(
 dataframe=valid_df,
-directory="newpo/posters",
+directory="combined_posters",
 x_col="filename",
 y_col=classes,
 batch_size=BS,
@@ -66,12 +66,12 @@ target_size=(299,299))
 
 test_generator=test_datagen.flow_from_dataframe(
 dataframe=test_df,
-directory="newpo/posters",
+directory="combined_posters",
 x_col="filename",
 y_col=classes,
 batch_size=BS,
 seed=42,
-shuffle=False,
+shuffle=True,
 class_mode=None,
 target_size=(299,299))
 
@@ -99,6 +99,12 @@ opt = Adam(learning_rate=LR)
 # Compile the model
 model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['mae', 'accuracy', tf.keras.metrics.F1Score(average='macro', name='f1_macro'), tf.keras.metrics.F1Score(average='micro', name='f1_micro'), tf.keras.metrics.Precision(), tf.keras.metrics.Recall()])
 
+# Build the model
+model.build()
+
+# Print the model summary
+print(model.summary())
+
 # train the network
 print("[INFO] training network...")
 H = model.fit(
@@ -113,7 +119,7 @@ model.save("./models/test.keras")
 # plot the mean absolute error
 plt.style.use("ggplot")
 plt.figure()
-plt.plot(np.arange(0, EPOCHS), H.history["mean_absolute_error"], label="train_mae")
+plt.plot(np.arange(0, EPOCHS), H.history["mae"], label="mae")
 plt.title("Mean Absolute Error")
 plt.xlabel("Epoch #")
 plt.ylabel("Mean Absolute Error")
@@ -123,7 +129,7 @@ plt.savefig("./plots/plot-mae.png")
 # plot the validation mean absolute error
 plt.style.use("ggplot")
 plt.figure()
-plt.plot(np.arange(0, EPOCHS), H.history["val_mean_absolute_error"], label="val_mae")
+plt.plot(np.arange(0, EPOCHS), H.history["val_mae"], label="val_mae")
 plt.title("Mean Absolute Error")
 plt.xlabel("Epoch #")
 plt.ylabel("Mean Absolute Error")
