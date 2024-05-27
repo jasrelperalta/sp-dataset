@@ -4,6 +4,7 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 import sys
+import os
 
 # Print options
 np.set_printoptions(threshold=sys.maxsize)
@@ -23,7 +24,7 @@ classes = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Drama", "Fant
 modelName = sys.argv[1]
 
 # Load Model
-modelPath = f'models/{modelName}.keras'
+modelPath = f'models/finalmodels/{modelName}.keras'
 model = load_model(filepath=modelPath)
 
 # Load CSV file
@@ -42,26 +43,26 @@ test_generator=test_datagen.flow_from_dataframe(
     shuffle=True,
     class_mode="raw",
     target_size=(299,299))
+    # target_size=(224,224))
 
 # Evaluate the model
 print("[INFO] evaluating model...")
 results = model.evaluate(test_generator)
+print(model.metrics_names)
 print(results)
+
+
+# Check if directory exists
+if not os.path.exists("teststats"):
+    os.makedirs("teststats")
+
 
 # Save the results
 with open(f"teststats/{modelName}-test.txt", "w") as file:
     file.write(f"Loss: {results[0]}\n")
-    file.write(f"Accuracy: {results[1]}\n")
-    file.write(f"F1-Macro: {results[2]}\n")
-    file.write(f"F1-Micro: {results[3]}\n")
-    file.write(f"Precision: {results[4]}\n")
-    file.write(f"Recall: {results[5]}\n")
-    file.write(f"MAE: {results[6]}\n")
-    file.write(f"Val Loss: {results[7]}\n")
-    file.write(f"Val Accuracy: {results[8]}\n")
-    file.write(f"Val F1-Macro: {results[9]}\n")
-    file.write(f"Val F1-Micro: {results[10]}\n")
-    file.write(f"Val Precision: {results[11]}\n")
-    file.write(f"Val Recall: {results[12]}\n")
-    file.write(f"Val MAE: {results[13]}\n")
-
+    file.write(f"MAE: {results[1]}\n")
+    file.write(f"Accuracy: {results[2]}\n")
+    file.write(f"F1 Macro: {results[3]}\n")
+    file.write(f"F1 Micro: {results[4]}\n")
+    file.write(f"Precision: {results[5]}\n")
+    file.write(f"Recall: {results[6]}\n")
