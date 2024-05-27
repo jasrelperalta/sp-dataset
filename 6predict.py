@@ -62,6 +62,7 @@ def initialize():
 
 # Classify a single image
 def classify_image(image_path, model):
+    # Load the image
     img = tf.keras.preprocessing.image.load_img(image_path, target_size=(299, 299))
     img_array = tf.keras.preprocessing.image.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0) # Create a batch
@@ -80,6 +81,6 @@ def classify_batch(batch, model):
 
 if __name__ == "__main__":
     model, generator, test_generator = initialize()
-
+    print("jas")
     if len(sys.argv) > 1:
         classify_image(sys.argv[1], model)

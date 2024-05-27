@@ -4,9 +4,13 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+
+# Get from sys.argv
+modelName = sys.argv[1]
 
 # load the data from the txt file
-with open("ayo.txt", "r") as file:
+with open(f"trainstats/{modelName}", "r") as file:
     data = file.readlines()
 
 # extract the data
@@ -196,5 +200,17 @@ plt.xlabel("Epoch #")
 plt.ylabel("Accuracy")
 plt.legend()
 plt.savefig("./plots/plot-train-val-accuracy.png")
+
+# plot the training and validation loss
+plt.style.use("ggplot")
+plt.figure()
+plt.plot(np.arange(0, len(epochs)), loss, label="train_loss")
+plt.plot(np.arange(0, len(epochs)), val_loss, label="val_loss")
+plt.title("Training and Validation Loss")
+plt.xlabel("Epoch #")
+plt.ylabel("Loss")
+plt.legend()
+plt.savefig("./plots/plot-train-val-loss.png")
+
 
 

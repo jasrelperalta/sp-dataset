@@ -1,0 +1,9 @@
+may24-5:49 PM : Xception Training: monitor val_f1_micro: Using Adam for Loss
+
+models to try: 
+may25madaling araw - XCeption using SGD for loss - monitored f1 micro - ayo5.txt
+may253pm - XCeption using Adam for loss - monitor loss - ayo7.txt
+may26madaling araw - XCeption using SGD for loss - monitor loss - ayo6.txt
+
+    - VGG using Adam for loss
+    - VGG using SGD for loss
