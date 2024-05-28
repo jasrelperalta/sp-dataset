@@ -31,8 +31,12 @@ model = load_model(filepath=modelPath)
 test_csv_file_path = 'movie_dataset_test2.csv'
 test_dataframe = pd.read_csv(test_csv_file_path)
 
-# Load the images and labels using image data generator from directory
+# Load the images and labels using image data generator from directory for Xception
 test_datagen=ImageDataGenerator(preprocessing_function=tf.keras.applications.xception.preprocess_input,)
+
+# Load the images and labels using image data generator from directory for VGG16
+test_datagen=ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input,)
+
 test_generator=test_datagen.flow_from_dataframe(
     dataframe=test_dataframe,
     directory="combined_posters",
@@ -42,8 +46,8 @@ test_generator=test_datagen.flow_from_dataframe(
     seed=42,
     shuffle=True,
     class_mode="raw",
-    target_size=(299,299))
-    # target_size=(224,224))
+    # target_size=(299,299))
+    target_size=(224,224))
 
 # Evaluate the model
 print("[INFO] evaluating model...")
